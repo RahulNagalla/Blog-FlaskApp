@@ -219,33 +219,18 @@ def edit_article(id):
         return redirect(url_for('dashboard'))
     return render_template('edit_article.html',form=form)
 
-# @app.route('/delete_article/<string:id>',methods=['GET','POST'])
-# @is_logged_in
-# def edit_article(id):
-#     form = ArticleForm(request.form)
-#     cur = mysql.connection.cursor()
-#     #Get Article for editing by id
-#     result = cur.execute("DELETE * FROM articles WHERE id=%s",[id])
-#     article = cur.fetchone()
-#     form =ArticleForm(request.form)
-#     form.title.data = article['title']
-#     form.body.data  = article['body']
-#
-#     if request.method == 'POST' and form.validate():
-#         title =request.form['title']
-#         body = request.form['body']
-#         cur = mysql.connection.cursor()
-#         cur.execute("UPDATE articles SET title=%s,body=%s WHERE id=%s",(title,body,id))
-#         mysql.connection.commit()
-#         cur.close()
-#         flash('Article Updated','success')
-#         return redirect(url_for('dashboard'))
-#     return render_template('delete_article.html',form=form)
-
-
-
-
-
+@app.route('/delete_article/<string:id>',methods=['POST'])
+@is_logged_in
+def delete_article(id):
+    form = ArticleForm(request.form)
+    cur = mysql.connection.cursor()
+    #Get Article for editing by id
+    result = cur.execute("DELETE  FROM articles WHERE id= %s",[id])
+    cur = mysql.connection.cursor()
+    mysql.connection.commit()
+    cur.close()
+    flash('Article Deleted','success')
+    return redirect(url_for('dashboard'))
 
 
 if __name__ == '__main__':
