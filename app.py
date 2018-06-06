@@ -1,5 +1,4 @@
 from flask import Flask,render_template, flash, redirect, url_for, session, logging, request
-from data import Articles
 from flask_mysqldb import MySQL
 
 from wtforms import Form, StringField,TextAreaField,PasswordField,validators
@@ -19,7 +18,7 @@ app.config['MYSQL_CURSORCLASS']= 'DictCursor'
 mysql = MySQL(app)
 
 
-Articles=Articles()
+
 
 
 #Index
@@ -37,13 +36,26 @@ def about():
 #Articles
 @app.route('/articles')
 def articles():
-    return render_template('articles.html',articles=Articles)
+    cur=mysql.connection.cursor()
+    result=cur.execute("SELECT * FROM articles");
+    articles = cur.fetchall()
+    if result > 0:
+        return render_template('articles.html',articles=articles)
+    else:
+        msg="No Articles Found"
+        return render_template('articles.html',msg=msg)
+    cur.close()
+
 
 
 #Single Article
 @app.route('/article/<string:id>/')
 def article(id):
-    return render_template('article.html',id=id)
+    cur=mysql.connection.cursor()
+    result=cur.execute("SELECT * FROM articles WHERE id=%s",[id]);
+    article = cur.fetchone()
+    cur.close()
+    return render_template('article.html',article=article)
 
 
 #RegisteForm Class
@@ -140,7 +152,7 @@ def is_logged_in(f):
 @is_logged_in
 def logout():
     session.clear()
-    flash('You are noe logget out','success')
+    flash('You are now logget out','success')
     return redirect(url_for('login'))
 
 
@@ -148,7 +160,16 @@ def logout():
 @app.route('/dashboard')
 @is_logged_in
 def dashboard():
-    return render_template('dashboard.html')
+    cur=mysql.connection.cursor()
+    result=cur.execute("SELECT * FROM articles");
+    articles = cur.fetchall()
+    if result > 0:
+        return render_template('dashboard.html',articles=articles)
+    else:
+        msg="No Articles Found"
+        return render_template('dashboard.html',msg=msg)
+    cur.close()
+    # return render_template('dashboard.html')
 
 #Article form class
 class ArticleForm(Form):
